@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Include Google Maps JS API -->
+        <script type="text/javascript"
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAtS_6mlBUfmxGrmePDkeg3iRS0cgVHUXk&sensor=false">
+        </script>
+        <style type="text/css">
+              #mapDiv { width: 800px; height: 500px; }
+        </style>
+        <!-- Map creation is here -->
+        <script type="text/javascript">
+              //Defining map as a global variable to access from other functions
+              var map;
+              function initMap () {
+                    //Enabling new cartography and themes
+                    google.maps.visualRefresh = true;
+
+                    //Setting starting options of map
+                    var mapOptions = {
+                          center: new google.maps.LatLng(39.9078, 32.8252),
+                          zoom: 10,
+                          mapTypeId: google.maps.MapTypeId.ROADMAP,
+                          disableDefaultUI: true
+                    };
+
+                    //Getting map DOM element
+                    var mapElement = document.getElementById('mapDiv');
+
+                    //Creating a map with DOM element which is just obtained
+                    map = new google.maps.Map(mapElement, mapOptions);
+
+                    startButtonEvents();
+              }
+
+              //Function that start listening the click events of the buttons.
+              function startButtonEvents () {
+                  document.getElementById('btnRoad').addEventListener('click', function(){
+                      map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+                  });
+                  document.getElementById('btnSat').addEventListener('click', function(){
+                      map.setMapTypeId(google.maps.MapTypeId.SATELLITE);
+                  });
+                  document.getElementById('btnHyb').addEventListener('click', function(){
+                      map.setMapTypeId(google.maps.MapTypeId.HYBRID);
+                  });
+                  document.getElementById('btnTer').addEventListener('click', function(){
+                      map.setMapTypeId(google.maps.MapTypeId.TERRAIN);
+                  });
+              }
+
+              google.maps.event.addDomListener(window, 'load', initMap);
+        </script>
+    </head>
+    <body>
+        <b>Chapter 1 - Changing Base Maps</b><br/>
+        <input id="btnRoad" type="button" value="RoadMap">
+        <input id="btnSat" type="button" value="Satellite">
+        <input id="btnHyb" type="button" value="Hybrid">
+        <input id="btnTer" type="button" value="Terrain">
+        <div id="mapDiv"></div>
+    </body>
+</html>

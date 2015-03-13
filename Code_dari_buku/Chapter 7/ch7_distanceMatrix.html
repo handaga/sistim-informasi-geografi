@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+        <style type="text/css">
+              html { height: 100% }
+              body { height: 100%; margin: 5px; }
+              #mapDiv { width: 100%; height: 95%; }
+			  #directionsMatrixDiv { padding:10px; width: 600px; height: 500px; }
+			  #mapContainerDiv { padding:10px; float:left; width: 800px; height: 500px}
+			  #matrixResultDiv {overflow-y: auto;max-width:600px; max-height:600px;}
+        </style>
+        <!-- Include Google Maps JS API -->
+        <script type="text/javascript"
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBR48eWLpcfyXoBH5YbJvBRfdvpRfDymxo&libraries=drawing&sensor=false">
+        </script>
+        
+  <!-- Map creation is here -->
+        <script type="text/javascript">
+              //Defining map as a global variable to access from other functions
+              var map;
+              
+			  //define array that includes all origin LatLng object
+			  var originLatLngs;
+			  
+			  //define array that includes all destibation LatLng object
+			  var destinationLatLngs;
+			  
+			  //define global DistanceMatrixService object
+			  var distanceMatrixService;
+			  
+			  //define global markerCount variable
+			  var markerCount;
+			  
+			  //define global matrixResultDiv variable
+			  var matrixResultDiv;
+              
+              function initMap() {
+					//initialize originLatLngs array
+					originLatLngs = [];
+					
+					//initialize destinationLatLngs array
+					destinationLatLngs = [];
+					
+					//get generateDistanceMatrix button and and click event handler
+					var generateDistanceMatrixBtn = document.getElementById('generateDistanceMatrix');
+					generateDistanceMatrixBtn.addEventListener('click', function(){
+						makeDistanceMatrixRequest();
+					});
+					
+					//initialize DistanceMatrixService object
+					distanceMatrixService = new google.maps.DistanceMatrixService();
+					
+					//initialize markerCount - the count of markers to be drawn
+					markerCount = 0;
+					
+					//assign matrixResultDiv to the specific div element
+					matrixResultDiv = document.getElementById('matrixResultDiv');
+
+                    //Enabling new cartography and themes
+                    google.maps.visualRefresh = true;
+
+                    //Setting starting options of map
+                    var mapOptions = {
+                          center: new google.maps.LatLng(39.9078, 32.8252),
+                          zoom: 10,
+                          mapTypeId: google.maps.MapTypeId.ROADMAP
+                    };
+
+                    //Getting map DOM element
+                    var mapElement = document.getElementById("mapDiv");
+
+                    //Creating a map with DOM element which is just obtained
+                    map = new google.maps.Map(mapElement, mapOptions);
+					
+					//creating drawingManager
+					var drawingManager = new google.maps.drawing.DrawingManager({
+						//initial drawing tool to be enabled
+						drawingMode:null,
+						//enable the drawingControl to be seen in the UI
+						drawingControl:true,
+						//select which drawing modes to be seen in the drawingControl and position them
+						drawingControlOptions: {
+							//select a position in the UI
+							position: google.maps.ControlPosition.TOP_CENTER,
+							//selected drawing modes to be seen in the control
+							drawingModes: [
+								google.maps.drawing.OverlayType.MARKER
+							]
+						}
+					});
+					
+					//enable drawing functionality
+					drawingManager.setMap(map);
+					
+					//add event listener for completion of your marker
+					google.maps.event.addListener(drawingManager, 'markercomplete', function(marker) {
+						
+						//count the number of markers drawn
+						markerCount++;
+						
+						//limit the number of markers to 10
+						if (markerCount > 10)
+						{
+							alert("No more origins or destinations allowed");
+							drawingManager.setMap(null);
+							marker.setMap(null);
+							return;
+						}
+						
+						//distinguish the markers, make the blue ones be destinations and red ones origins
+						if (markerCount % 2 === 0)
+						{
+							destinationLatLngs.push(marker.getPosition());
+							marker.setIcon('icons/b' + destinationLatLngs.length + '.png');
+						}
+						else
+						{
+							originLatLngs.push(marker.getPosition());
+							marker.setIcon('icons/r' + originLatLngs.length + '.png');
+						}
+					});	
+              } 
+
+			//function for preparing the request properties and sending the request for distanceMatrixService
+			function makeDistanceMatrixRequest()
+			{
+				distanceMatrixService.getDistanceMatrix(
+					{
+						origins: originLatLngs,
+						destinations: destinationLatLngs,
+						travelMode: google.maps.TravelMode.DRIVING,
+					}, 
+					getDistanceMatrixResult
+				);
+			}
+			
+			//callback function for the getDistanceMatrix request
+			function getDistanceMatrixResult(result, status)
+			{
+				//clear the div contents where matrix results will be written
+				matrixResultDiv.innerHTML = '';
+				
+				//if everything is OK
+				if (status == google.maps.DistanceMatrixStatus.OK) {
+					//get the array of originAddresses
+					var originAddresses = result.originAddresses;
+					//get the array of destinationAddresses
+					var destinationAddresses = result.destinationAddresses;
+
+					//there are two loops, the outer is for origins, the inner will be for destinations, 
+					//their intersection will be the element object itself 
+					for (var i = 0, l=originAddresses.length; i < l; i++) {
+						//get the elements array
+						var elements = result.rows[i].elements;
+						for (var j = 0, m=elements.length; j < m; j++) {
+							var originAddress = originAddresses[i];
+							var destinationAddress = destinationAddresses[j];
+							
+							//get the element object
+							var element = elements[j];
+							
+							//get distance and duration properties for the element object
+							var distance =  element.distance.text;
+							var duration = element.duration.text;
+							
+							//write the results to the div for each element object
+							writeDistanceMatrixResultOnDiv(originAddress, destinationAddress, distance, duration, i, j);
+						}
+					}
+				}
+				else
+				{
+					alert('Cannot find distance matrix because: ' + status);
+				}
+			}
+			
+			//function for writing the results to the matrixResultDiv
+			function writeDistanceMatrixResultOnDiv(originAddress, destinationAddress, distance, duration, originAddressCount, destinationAddressCount)
+			{
+				//get the existing content
+				var existingContent = matrixResultDiv.innerHTML;
+				
+				var newContent;
+				
+				//write the Origin Address and Destination Address together with travel distance and duration
+				newContent = '<b>Origin ' + letterForCount(originAddressCount) + ' :</b><br />';
+				newContent += originAddress + '<br />';
+				newContent += '<b>Destination ' + letterForCount(destinationAddressCount) + ' :</b><br />';
+				newContent += destinationAddress + '<br />';
+				newContent += '<b>Distance: </b> ' + distance + '<br />';
+				newContent += '<b>Duration: </b> ' + duration + '<br />';
+				newContent += '<br />';
+				
+				//add the newContent to the existingContent of the matrixResultDiv
+				matrixResultDiv.innerHTML = existingContent + newContent;
+			}
+			
+			//function for converting the counts to the letters, the aim is to match the counts with the marker icons
+			function letterForCount(count)
+			{
+				switch (count)
+				{
+					case 0:
+						return 'A';
+					case 1:
+						return 'B';
+					case 2:
+						return 'C';
+					case 3:
+						return 'D';
+					case 4:
+						return 'E';
+					default:
+						return null;
+				}
+			}
+			
+        </script>
+    </head>
+    <body onload="initMap()">
+        <span id="mapContainerDiv">
+			<b>Directions</b>
+			<div id="mapDiv" >
+			</div>
+		</span>
+		<span id="directionsMatrixDiv">
+			<b>Finding Distance Matrix Through Origins and Destinations</b></br>
+			<input type="button" id ="generateDistanceMatrix" value="Generate Distance Matrix" />
+			<div id="matrixResultDiv">
+			</div>
+		</span>
+    </body>
+</html>

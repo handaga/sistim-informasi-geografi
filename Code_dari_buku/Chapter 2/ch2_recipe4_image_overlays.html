@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+        <style type="text/css">
+              html { height: 100% }
+              body { height: 100%; margin: 5; }
+              #mapDiv { width: 800px; height: 500px; }
+        </style>
+        <!-- Include Google Maps JS API -->
+        <script type="text/javascript"
+          src="https://maps.googleapis.com/maps/api/js?sensor=false">
+        </script>
+        
+  <!-- Map creation is here -->
+        <script type="text/javascript">
+              //Defining map as a global variable to access from other functions
+              var map;
+              function initMap() {
+              		
+                    //Enabling new cartography and themes
+                    google.maps.visualRefresh = true;
+
+                    //Setting starting options of map with mapTypeIds including the new style
+                    var mapOptions = {
+						zoom: 17,
+						mapTypeControlOptions: {mapTypeIds: [google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.SATELLITE]}
+					};
+					
+					//Getting map DOM element
+                    var mapElement = document.getElementById("mapDiv");
+
+                    //Creating a map with DOM element which is just obtained
+                    map = new google.maps.Map(mapElement, mapOptions);
+					
+					//Defining boundary for tiles for building plan of Moscone Center West
+					var bounds = {
+						17: [[20969, 20970], [50657, 50658]],
+						18: [[41939, 41940], [101315, 101317]],
+						19: [[83878, 83881], [202631, 202634]],
+						20: [[167757, 167763], [405263, 405269]]
+					};
+					
+					//Defining Overlay Building Plan Map Type
+					var buildPlanMapType = new google.maps.ImageMapType({
+   			         	getTileUrl: function(coord, zoom) {
+                    		if (zoom < 17 || zoom > 20 ||
+								bounds[zoom][0][0] > coord.x || coord.x > bounds[zoom][0][1] ||
+								bounds[zoom][1][0] > coord.y || coord.y > bounds[zoom][1][1]) {
+									return null;
+							}
+							
+							 return ['http://www.gstatic.com/io2010maps/tiles/5/L2_', zoom, '_', coord.x, '_', coord.y, '.png'].join('');
+                		},
+                		tileSize: new google.maps.Size(256, 256),
+                		name: "Google IO Building Plan",
+                		maxZoom: 20
+            		});
+            		
+					//set the ROADMAP to be displayed as base map
+					map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+					
+					//overlay the buildPlanMapType on top of base maps
+					map.overlayMapTypes.insertAt(0, buildPlanMapType);
+					
+					//center the map on Moscone Center
+					map.setCenter(new google.maps.LatLng(37.78320, -122.40421));
+              }
+
+           
+        </script>
+    </head>
+    <body onload="initMap()">
+        <b>Image Overlays</b><br/>
+        <div id="mapDiv"/>
+    </body>
+</html>

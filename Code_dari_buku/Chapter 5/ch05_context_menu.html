@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Include Google Maps JS API -->
+        <script type="text/javascript"
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAtS_6mlBUfmxGrmePDkeg3iRS0cgVHUXk&sensor=false">
+        </script>
+        <style type="text/css">
+              #mapDiv { width: 800px; height: 500px; }
+
+              .contextmenu{
+                  visibility: hidden;
+                  background: #ffffff;
+                  border: 1px solid #8888FF;
+                  z-index: 10;
+                  position: relative;
+                  width: 100px;
+                  height: 50px;
+                  padding: 5px;
+              }
+        </style>
+        <!-- Map creation is here -->
+        <script type="text/javascript">
+              //Defining map as a global variable to access from other functions
+              var map;
+              var contextMenu, lastCoordinate;
+
+              //Defining the context menu class.
+              function ContextMenuClass(map) {
+                    this.setMap(map);
+                    this.map = map;
+                    this.mapDiv = map.getDiv();
+                    this.menuDiv = null;
+              };
+
+              ContextMenuClass.prototype = new google.maps.OverlayView();
+              ContextMenuClass.prototype.draw = function() {};
+              ContextMenuClass.prototype.onAdd = function() {
+                    var that = this;
+                    this.menuDiv = document.createElement('div');
+                    this.menuDiv.className = 'contextmenu';
+                    this.menuDiv.innerHTML = '<a href="javascript:createMarker()">Create Marker Here</a><br><a href="javascript:zoomIn()">Zoom In</a><br><a href="javascript:zoomOut()">Zoom Out</a><br>';
+                    this.getPanes().floatPane.appendChild(this.menuDiv);
+
+                    //This event listener below will close the context menu on map click
+                    google.maps.event.addListener(this.map, 'click', function(mouseEvent) {
+                        that.hide();
+                    });
+              };
+              ContextMenuClass.prototype.onRemove = function() {
+                    this.menuDiv.parentNode.removeChild(this.menuDiv);
+              };
+
+              ContextMenuClass.prototype.show = function(coord) {
+                    var proj = this.getProjection();
+                    var mouseCoords = proj.fromLatLngToDivPixel(coord);
+                    var left = Math.floor(mouseCoords.x);
+                    var top =  Math.floor(mouseCoords.y);
+                    this.menuDiv.style.display = 'block';
+                    this.menuDiv.style.left = left + 'px';
+                    this.menuDiv.style.top = top + 'px';
+                    this.menuDiv.style.visibility = 'visible';
+              };
+
+              ContextMenuClass.prototype.hide = function(x,y) {
+                  this.menuDiv.style.visibility = 'hidden';
+              }
+
+              //Defining context menu functions
+              function zoomIn() {
+                  map.setZoom(map.getZoom() + 1);
+              }
+
+              function zoomOut() {
+                  map.setZoom(map.getZoom() - 1);
+              }
+
+              function createMarker() {
+                  var marker = new google.maps.Marker({
+                      position: lastCoordinate,
+                      map: map,
+                      title: 'Random Marker'
+                  });
+              }
+
+              // Initializing the map
+              function initMap() {
+                    //Enabling new cartography and themes
+                    google.maps.visualRefresh = true;
+
+                    //Setting starting options of map
+                    var mapOptions = {
+                          center: new google.maps.LatLng(39.9078, 32.8252),
+                          zoom: 10,
+                          mapTypeId: google.maps.MapTypeId.ROADMAP
+                    };
+
+                    //Getting map DOM element
+                    var mapElement = document.getElementById('mapDiv');
+
+                    //Creating a map with DOM element which is just obtained
+                    map = new google.maps.Map(mapElement, mapOptions);
+
+                    //Creating a context menu to use it in event handler
+                    contextMenu = new ContextMenuClass(map);
+
+                    //Listening the map object for mouse right click.
+                    google.maps.event.addListener(map, 'rightclick', function(e) {
+                        lastCoordinate = e.latLng;
+                        contextMenu.show(e.latLng);
+                    });
+              }
+
+              google.maps.event.addDomListener(window, 'load', initMap);
+        </script>
+    </head>
+    <body>
+        <b>Chapter 5 - Creating a context menu on a map</b>
+        <div id="mapDiv"></div>
+    </body>
+</html>
