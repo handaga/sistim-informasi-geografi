@@ -9,7 +9,7 @@ Kuliah Sistim Informasi Geografi (SIG) atau GIS
 
 ## Note: account di github harus mennggunakan NIM, file kode program dan keterangan dipisah
 
-# TUGAS-3: 
+# TUGAS-3: ( update 12 Mei 2016 )
 
 Buatlah data peta wilayah KAMPUS UMS (1,2, FKG, FKU, KUI)
 dan jalan alternatif yang menghubungkan semua wilayah kampus.
