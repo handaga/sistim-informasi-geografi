@@ -2,6 +2,11 @@
 Kuliah Sistim Informasi Geografi (SIG) atau GIS
 
 
+# Tugas upload gambar photo-sphere / panorama 360 (Street View) 
+(update 6 Jun 2016)
+
+Kirimkan (share) ***LINK*** Gambar/foto yang sudah berhasil di upload ke email berikut   bana.handaga@gmail.com 
+
 # TUGAS-3: ( update 12 Mei 2016 )
 
 Buatlah data peta wilayah KAMPUS UMS (1,2, FKG, FKU, KUI)
