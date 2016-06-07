@@ -1,6 +1,11 @@
 # sistim-informasi-geografi
 Kuliah Sistim Informasi Geografi (SIG) atau GIS
 
+# ---------------------------------------------
+# Kisi-kisi untuk UAS 2016 dapat dilihat di direktori BAHAN_UAS (update 07-06-2016)
+# --------------------------------------------------
+Selamat Belajar semoga sukses
+
 
 # Tugas upload gambar photo-sphere / panorama 360 (Street View) 
 (update 6 Jun 2016)
