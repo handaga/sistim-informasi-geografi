@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Include Google Maps JS API -->
+        <script type="text/javascript"
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAtS_6mlBUfmxGrmePDkeg3iRS0cgVHUXk&sensor=false">
+        </script>
+        <style type="text/css">
+              #mapDiv { width: 800px; height: 500px; }
+        </style>
+        <!-- Map creation is here -->
+        <script type="text/javascript">
+              //Defining map as a global variable to access from other functions
+              var map;
+              var infowindow = null;
+
+              var my_e;  // global variabel
+
+              function initMap() {
+                    //Enabling new cartography and themes
+                    google.maps.visualRefresh = true;
+
+                    //Setting starting options of map
+                    var mapOptions = {
+                          center: new google.maps.LatLng(39.9078, 32.8252),
+                          zoom: 10,
+                          mapTypeId: google.maps.MapTypeId.ROADMAP
+                    };
+
+                    //Getting map DOM element
+                    var mapElement = document.getElementById('mapDiv');
+
+                    //Creating a map with DOM element which is just obtained
+                    map = new google.maps.Map(mapElement, mapOptions);
+
+                    google.maps.event.addListener(map, 'click',  function(e) {
+                        // e adalah variabel yang berisi 
+                        // tentang data setelah terjadi event click 
+                        // (1) dapat di lihat di manual gmap
+                        // (2) dapat di lihat dengan menggunakan console.log
+                        
+                        console.log('e:');
+                        console.log(e);  // untuk identifikasi informasi dalam e
+
+                        // jika sudah pernah ada event click sebelumnya
+                        // maka 'infowindow != null' atau tampil di layar
+                        // selanjutnya menutup "infowindow"  
+                        if (infowindow != null)
+                            infowindow.close();
+
+                        // membuat kontent infowindow
+                        infowindow = new google.maps.InfoWindow({
+                            content: '<h2 style="color:red">Belajar menampilkan posisi koordinat:</h2><hr><b>Latitude : </b>' + e.latLng.lat() + '<br><b>Longitude: </b>' + e.latLng.lng(),
+                            position: e.latLng
+                        });
+                        // menampilkan infowindow di atas "map"
+                         infowindow.open(map); 
+
+                        // di sini juga dapat ditambahkan 
+                        // kode untuk menyimpan data ke server
+
+                    });
+              }
+
+              google.maps.event.addDomListener(window, 'load', initMap);
+        </script>
+    </head>
+    <body>
+        <b>Chapter 5 - Getting Coordinates of a mouse click</b>
+        <div id="mapDiv"></div>
+    </body>
+</html>

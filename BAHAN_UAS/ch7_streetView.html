@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+        <style type="text/css">
+              html { height: 100% }
+              body { height: 100%; margin: 5; }
+              #mapDiv { width: 800px; height: 500px; }
+			  #addressDiv { width: 800px; height: 500px; }
+			  ul.addressList {list-style-type:circle;}
+        </style>
+        <!-- Include Google Maps JS API -->
+        <script type="text/javascript"
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBR48eWLpcfyXoBH5YbJvBRfdvpRfDymxo&libraries=places&sensor=false">
+        </script>
+        
+  <!-- Map creation is here -->
+        <script type="text/javascript">
+              //Defining map as a global variable to access from other functions
+              var map;
+			  
+			  //define global geocoder object
+			  var geocoder;
+			  
+			  //define global streetView object
+			  var streetView;
+			  
+              function initMap() {
+					//initialize info popup window
+					popup = new google.maps.InfoWindow();
+					
+					//initialize geocoder object
+					geocoder = new google.maps.Geocoder();
+					
+					//Enabling new cartography and themes
+                    google.maps.visualRefresh = true;
+
+                    //Setting starting options of map
+                    var mapOptions = {
+                          center: new google.maps.LatLng(39.9078, 32.8252),
+                          zoom: 10,
+                          mapTypeId: google.maps.MapTypeId.ROADMAP
+                    };
+
+                    //Getting map DOM element
+                    var mapElement = document.getElementById("mapDiv");
+
+                    //Creating a map with DOM element which is just obtained
+                    map = new google.maps.Map(mapElement, mapOptions);
+					
+					//initialize streetView object of type StreetViewPanorama
+					streetView = map.getStreetView();
+										
+				}
+			
+				//put a marker in the map for the addresses geocoded
+				function showAddressMarkerOnMapOrStreetView(result) {
+					var marker = new google.maps.Marker({
+						map:map,
+						position: result.geometry.location
+					});
+					
+					map.setCenter(result.geometry.location);
+					map.setZoom(16);
+				}
+				
+				//function for setting the streetView properties
+				function setStreetViewOptions(location)
+				{
+					//set the location of the streetView object
+					streetView.setPosition(location);
+					//set the "Point Of View" of streetView object
+					streetView.setPov({
+						heading: 0,
+						pitch: 10
+					});
+				}
+				
+				//function for listing addresses on the addressList element and calling the geocoding stuff
+				function listAddresses()
+				{
+					//get text input handler
+					var addressField = document.getElementById('addressField');
+					//get addressList <ul> element handle
+					var addressList = document.getElementById('addressList');
+					if (addressList.children.length == 0)
+					{
+						var placesText = document.getElementById('placesText');
+						placesText.innerHTML = 'Places You Have Visited (Click on the place name to see on map):';
+					}
+					//create a list item
+					var listItem = document.createElement('li');
+					//get the text in the input element and make it a list item
+					listItem.innerHTML = addressField.value;
+					listItem.addEventListener('click', function(){
+						pinAddressOnMapOrStreetView(listItem.innerHTML);
+					});
+					//append it to the <ul> element
+					addressList.appendChild(listItem);
+					
+					//call the geocoding function
+					pinAddressOnMapOrStreetView(addressField.value);
+				}
+				
+				//function for geocoding the addresses
+				function pinAddressOnMapOrStreetView(addressText)
+				{	
+					//send the geocoding request
+					geocoder.geocode({ 'address': addressText}, function(results, status) {
+      					//if the service is working properly...
+      					if (status == google.maps.GeocoderStatus.OK) {
+        					//show the first result on map, either on 
+        					showAddressMarkerOnMapOrStreetView(results[0]);
+							if (streetView.getVisible())
+							{
+								//set the streetView properties, its location and "Point Of View"
+								setStreetViewOptions(results[0].geometry.location);
+							}
+      					} else {
+        					alert('Cannot geocode because: ' + status);
+      					}
+    				});
+				}
+				
+				//function for displaying the familiar map view
+				function showMap()
+				{
+					var pinAddressBtn = document.getElementById('pinAddress');
+					pinAddressBtn.value = 'Pin Address On Map';
+					streetView.setVisible(false);
+				}
+				
+				//function for displaying the streetView
+				function showStreetView()
+				{
+					var pinAddressBtn = document.getElementById('pinAddress');
+					pinAddressBtn.value = 'Pin Address On StreetView';
+					//kode untuk membaca koordinat center 
+					//peta saat ini
+					setStreetViewOptions(map.getCenter());
+					
+					streetView.setVisible(true);
+
+				}	
+        </script>
+    </head>
+    <body onload="initMap()">
+        <div>
+			<b>Street View</b>
+			<div id="mapDiv"/>
+		</div>
+		<div id="addressDiv">
+			<b>Map your Holiday Places</b><br />
+			<input id="addressField" type="text" size="30"  placeholder="Enter your Address" />
+			<input type="button" id="pinAddress" value="Pin Address On Map" onclick="listAddresses()">
+			<input type="button" value="Show Map" onclick="showMap()">
+			<input type="button" value="Show StreetView" onclick="showStreetView()">
+			<p id="placesText"></p>
+			<ul id="addressList" class="addressList">
+			</ul>
+		</div>
+    </body>
+</html>
