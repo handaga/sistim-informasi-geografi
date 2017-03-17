@@ -1,6 +1,10 @@
 # sistim-informasi-geografi
 Kuliah Sistim Informasi Geografi (SIG) atau GIS
 
+# [Sistim Informasi Geografis 2017 di sini](https://github.com/handaga/Sistem-Informasi-Geografi-2017)
+   
+
+
 # ---------------------------------------------
 # Kisi-kisi untuk UAS 2016 dapat dilihat di direktori BAHAN_UAS (update 07-06-2016)
 # --------------------------------------------------
